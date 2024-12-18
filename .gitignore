@@ -1,0 +1,27 @@
+output.txt
+**/__pycache__/
+/wandb
+# *.png
+# *.PNG
+# *.jpg
+*.pth
+*.pt
+*.npy
+scheduler_test.py
+/archs/nafnet_utils/arch_model_dilated.py
+/utils/erfs
+create_set.py
+*.csv
+/all_imgs
+*.mp4
+/OLD_models
+resave_models.py
+OLD_requirements.txt
+.gitignore
+
+# Comment the next lines if train is uploaded
+train.py
+computing_test.py
+/utils/train_utils.py
+/options/train
+
