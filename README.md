@@ -1,11 +1,13 @@
 # DarkIR: Robust Low-Light Image Restoration
 
-## Abstract
+[![Hugging Face](https://img.shields.io/badge/Demo-%F0%9F%A4%97%20Hugging%20Face-blue)](https://huggingface.co/spaces/Cidaut/DarkIR) 
+[![paper](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2412.13443)
+
+Daniel Feijoo, Juan C. Benito, Alvaro Garcia, Marcos V. Conde
+
 > **Abstract:**
 >Photography during night or in dark conditions typically suffers from noise, low light and blurring issues due to the dim environment and the common use of long exposure. Although Deblurring and Low-light Image Enhancement (LLIE) are related under these conditions, most approaches in image restoration solve these tasks separately. In this paper, we present an efficient and robust neural network for multi-task low-light image restoration. Instead of following the current tendency of Transformer-based models, we propose new attention mechanisms to enhance the receptive field of efficient CNNs. Our method reduces the computational costs in terms of parameters and MAC operations compared to previous methods. Our model, DarkIR, achieves new state-of-the-art results on the popular LOLBlur, LOLv2 and Real-LOLBlur datasets, being able to generalize on real-world night and dark images.
 
-[![Hugging Face](https://img.shields.io/badge/Demo-%F0%9F%A4%97%20Hugging%20Face-blue)](https://huggingface.co/spaces/Cidaut/DarkIR) 
-[![paper](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)]()
 
 | <img src="assets/teaser/0085_low.png" alt="add" width="450"> | <img src="assets/teaser/0085_retinexformer.png" alt="add" width="450"> | <img src="assets/teaser/0085_darkir.png" alt="add" width="450"> |
 |:-------------------------:|:-------------------------:|:-------------------------:|
@@ -129,4 +131,5 @@ which will be saved in `./videos/results`.
 
 ## Contact
 
-If you have any questions, please contact danfei@cidaut.es.
+If you have any questions, please contact danfei@cidaut.es and marcos.conde@uni-wuerzburg.de
+
