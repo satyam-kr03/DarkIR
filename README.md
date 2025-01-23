@@ -53,6 +53,11 @@ The datasets used for training and/or evaluation are:
 |Real-LOLBlur | 1354 unpaired images  | [LEDNet](https://github.com/sczhou/LEDNet)  |
 |LSRW-Nikon | 3150 training pairs / 20 test pairs | [R2RNet](https://github.com/JianghaiSCU/R2RNet) |
 |LSRW-Huawei | 2450 training pairs / 30 test pairs | [R2RNet](https://github.com/JianghaiSCU/R2RNet) |
+<!-- |DICM|||
+|NPE|||
+|MEF|||
+|LIME|||
+|VV||| -->
 
 You can download each specific dataset and put it on the `/data/datasets` folder for testing. 
 
@@ -63,18 +68,25 @@ We present results in different datasets for DarkIR of different sizes. While **
 | -----------| :---------------:|:------:|------|------|
 |LOL-Blur    | DarkIR-m| 27.00| 0.883| 0.162|
 |   | DarkIR-l| 27.30| 0.898| 0.137|
-|LOLv2-real  | DarkIR-m| 32.34| 0.922| 0.148|
-|LOLv2-synth | DarkIR-m| 25.21| 0.937| 0.053|
-|LSRW-Both | DarkIR-m| 18.53| 0.565| 0.415|
+|LOLv2-real  | DarkIR-m| 23.87| 0.880| 0.186|
+|LOLv2-synth | DarkIR-m| 25.54| 0.934| 0.058|
+|LSRW-Both | DarkIR-m| 18.93| 0.583| 0.412|
 
-We also present perceptual metrics for Real-LOLBlur dataset:
+We present perceptual metrics for Real-LOLBlur dataset:
 
 | Model| MUSIQ| NRQM  | NIQE |
 | -----------| :---------------:|:------:|:------:|
 | DarkIR-m| 48.36| 4.983| 4.998|
 | DarkIR-l| 48.79| 4.917| 5.051|
 
-> LOLBlur results were obtained training the network only in this dataset. Best results in LOLv2-real and both LSRW were obtained in a multitask training of the two datasets with LOLBlur (getting 26.46 PSNR and 0.874 SSIM in this dataset). In LOLv2-synth we trained also with LOLBlur (26.07 PSNR and 0.857 SSIM). Finally Real-LOLBlur results were obtained with a model trained in LOLBlur.
+> LOLBlur results were obtained training the network only in this dataset. Best results in LOLv2-real, LOLv2-synth and both LSRW were obtained in a multitask training of the three datasets with LOLBlur (getting 26.63 PSNR and 0.875 SSIM in this dataset). Finally Real-LOLBlur results were obtained with a model trained in LOLBlur.
+
+In addition, we tested our **DarkIR-m** in Real-World LLIE unpaired Datasets (downloaded from [Drive](https://drive.google.com/drive/folders/0B_FjaR958nw_djVQanJqeEhUM1k?usp=sharing)):
+
+| | DICM| MEF  | LIME | NPE | VV |
+| -----------| :---------------:|:------:|:------:|:------:|:------:|
+| BRISQUE| 18.688| 13.903| 21.62| 12.877|  26.87|
+| NIQE| 3.759| 3.448| 4.074| 3.991|  3.74|
 
 <!-- 
 ## Training
@@ -92,7 +104,7 @@ To check our results you could run the evaluation of DarkIR in each of the datas
 - Download the weights of the model from [OneDrive](https://cidautes-my.sharepoint.com/:f:/g/personal/alvgar_cidaut_es/Epntbl4SucFNpeIT_jyYZ-cB9BamMbacbyq_svrkMCpShA?e=XB9YBB) and put them in `/models`.
 - run `python testing.py -p ./options/test/<config.yml>`. Default is LOLBlur.
 
-> You may also check the qualitative results in `Real-LOLBlur` by running `python testing_unpaired.py`. 
+> You may also check the qualitative results in `Real-LOLBlur` and LLIE unpaired by running `python testing_unpaired.py -p ./options/test/<config.yml>`. Default is RealBlur.
 
 ## Inference
 

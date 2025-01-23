@@ -12,6 +12,6 @@ network:
 
 #### save model
 save:
-  path: ./models/darkir_1k_cr_mt.pt
+  path: ./models/RetinexFormer_LOL_v2_real.pth
 
-Resize: False
+Resize: True

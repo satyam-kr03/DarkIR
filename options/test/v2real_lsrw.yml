@@ -24,6 +24,6 @@ network:
 
 #### model weights
 save:
-  path: ./models/darkir_v2real+lsrw.pt
+  path: ./models/DarkIR_1k_cr_mt.pt
 
 Resize: False

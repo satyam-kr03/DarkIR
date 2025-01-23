@@ -36,6 +36,8 @@ def load_model(model, path_weights):
 
     map_location = 'cpu'
     checkpoints = torch.load(path_weights, map_location=map_location, weights_only=False)
+    # print(checkpoints.keys())
+    # sys.exit()
     weights = checkpoints['params']
     weights = {'module.' + key: value for key, value in weights.items()}
 

@@ -4,6 +4,8 @@ Script for testing the different models in unpaired dataset
 import os
 import argparse
 from options.options import parse
+from archs.retinexformer import RetinexFormer
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 parser = argparse.ArgumentParser(description="Script for testing")
 parser.add_argument('-p', '--config', type=str, default='./options/test/RealBlur_Night.yml', help = 'Config file of testing')
@@ -40,8 +42,8 @@ def pad_tensor(tensor, multiple = 8):
     return tensor
 
 def load_model(rank, model, path_weights):
-    map_location = {'cuda:%d' % 0: 'cuda:%d' % rank}
-    checkpoints = torch.load(path_weights, map_location=map_location, weights_only=False)
+    map_location = 'cpu'
+    checkpoints = torch.load(path_weights, map_location='cpu', weights_only=False)
    
     weights = checkpoints['params']
     weights = {'module.' + key: value for key, value in weights.items()}
@@ -52,7 +54,26 @@ def load_model(rank, model, path_weights):
     model.load_state_dict(weights)
     return model
 
-def create_losses(list_of_losses = ['musiq', 'niqe', 'nrqm'], rank=0):
+# def load_retinexformer(path_weights, rank):
+#     model = RetinexFormer()
+
+#     model.to(rank)
+    
+#     model = DDP(model, device_ids=[rank], find_unused_parameters=False)
+#     map_location = 'cpu'
+#     checkpoints = torch.load(path_weights, map_location=map_location, weights_only=False)
+   
+#     weights = checkpoints['params']
+#     weights = {'module.' + key: value for key, value in weights.items()}
+
+#     macs, params = get_model_complexity_info(model, (3, 256, 256), print_per_layer_stat=False, verbose=False)
+#     print(macs, params)
+#     model.load_state_dict(weights)
+#     print('Loaded weights correctly')
+    
+#     return model
+
+def create_losses(list_of_losses = ['musiq', 'niqe', 'nrqm', 'brisque'], rank=0):
     losses = {}
     for name in list_of_losses:
         losses[name] = {name: pyiqa.create_metric(name).to(rank)}
@@ -63,14 +84,16 @@ resize = opt['Resize']
 
 def eval_unpaired(rank, world_size):
 
-    setup(rank, world_size=world_size)
+    setup(rank, world_size=world_size, Master_port='12354')
 
     test_loader, _ = create_test_data(rank, world_size=world_size, opt = opt['datasets'])
 
     model, _, _ = create_model(opt['network'], rank)
     model = load_model(rank, model, path_weights = opt['save']['path'])
-
-    names = ['musiq','niqe', 'nrqm']
+    print('Using weights in: ', opt['save']['path'])
+    # model = load_retinexformer(path_weights=opt['save']['path'], rank=rank)
+    
+    names = opt['quali']
     losses = create_losses(names, rank)
     if rank==0:
         pbar = tqdm(total = len(test_loader))
@@ -83,7 +106,7 @@ def eval_unpaired(rank, world_size):
         element = element.to(rank)
 
         _, _, H, W = element.shape
-        if resize:
+        if resize and (H >=1500 or W>=1500):
             new_size = [int(dim//2) for dim in (H, W)]
             downsample = Resize(new_size)
         else:
@@ -94,6 +117,7 @@ def eval_unpaired(rank, world_size):
         
         with torch.no_grad():
             result = model(element, side_loss = False)
+            # result = element
         
         if resize:
             upsample = Resize((H, W))

@@ -116,7 +116,7 @@ class DarkIR(nn.Module):
 if __name__ == '__main__':
     
     img_channel = 3
-    width = 64
+    width = 32
     
     enc_blks = [1, 2, 3]
     middle_blk_num_enc = 2

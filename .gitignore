@@ -18,10 +18,23 @@ create_set.py
 resave_models.py
 OLD_requirements.txt
 .gitignore
+/outputs
+testing_two_pipeline.py
+/utils_detection
+/options/test/Two_Pipelines.yml
+/archs/nafnet_utils
+/archs/nafnet.py
+/archs/lednet.py
+/archs/mimo.py
+/archs/lednet_archs
+# /archs/retinexformer.py
+metrics.sh
+.gitignore
+/options/test/exdark.yml
+/data/datasets/*
 
 # Comment the next lines if train is uploaded
 train.py
 computing_test.py
 /utils/train_utils.py
 /options/train
-
