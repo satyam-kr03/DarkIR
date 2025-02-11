@@ -54,25 +54,6 @@ def load_model(rank, model, path_weights):
     model.load_state_dict(weights)
     return model
 
-# def load_retinexformer(path_weights, rank):
-#     model = RetinexFormer()
-
-#     model.to(rank)
-    
-#     model = DDP(model, device_ids=[rank], find_unused_parameters=False)
-#     map_location = 'cpu'
-#     checkpoints = torch.load(path_weights, map_location=map_location, weights_only=False)
-   
-#     weights = checkpoints['params']
-#     weights = {'module.' + key: value for key, value in weights.items()}
-
-#     macs, params = get_model_complexity_info(model, (3, 256, 256), print_per_layer_stat=False, verbose=False)
-#     print(macs, params)
-#     model.load_state_dict(weights)
-#     print('Loaded weights correctly')
-    
-#     return model
-
 def create_losses(list_of_losses = ['musiq', 'niqe', 'nrqm', 'brisque'], rank=0):
     losses = {}
     for name in list_of_losses:
@@ -91,7 +72,6 @@ def eval_unpaired(rank, world_size):
     model, _, _ = create_model(opt['network'], rank)
     model = load_model(rank, model, path_weights = opt['save']['path'])
     print('Using weights in: ', opt['save']['path'])
-    # model = load_retinexformer(path_weights=opt['save']['path'], rank=rank)
     
     names = opt['quali']
     losses = create_losses(names, rank)

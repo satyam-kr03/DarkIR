@@ -66,25 +66,6 @@ def pad_tensor(tensor, multiple = 8):
     
     return tensor
 
-def load_retinexformer(path_weights, rank):
-    model = RetinexFormer()
-
-    model.to(rank)
-    
-    model = DDP(model, device_ids=[rank], find_unused_parameters=False)
-    map_location = 'cpu'
-    checkpoints = torch.load(path_weights, map_location=map_location, weights_only=False)
-   
-    weights = checkpoints['params']
-    weights = {'module.' + key: value for key, value in weights.items()}
-
-    macs, params = get_model_complexity_info(model, (3, 256, 256), print_per_layer_stat=False, verbose=False)
-    print(macs, params)
-    model.load_state_dict(weights)
-    print('Loaded weights correctly')
-    
-    return model
-
 def load_model(model, path_weights):
     map_location = 'cpu'
     checkpoints = torch.load(path_weights, map_location=map_location, weights_only=False)
@@ -108,18 +89,17 @@ def predict_folder(rank, world_size):
     setup(rank, world_size=world_size, Master_port='12354')
     
     # DEFINE NETWORK, SCHEDULER AND OPTIMIZER
-    # model, _, _ = create_model(opt['network'], rank=rank)
+    model, _, _ = create_model(opt['network'], rank=rank)
 
-    # model = load_model(model, path_weights = opt['save']['path'])
-    model = load_retinexformer(path_weights=opt['save']['path'], rank=rank)
+    model = load_model(model, path_weights = opt['save']['path'])
     # create data
     PATH_IMAGES= args.inp_path
-    PATH_RESULTS = os.path.join('/mnt/valab-datasets/results_ExDark', 'RetinexFormer')
+    PATH_RESULTS = './images/results'
 
     #create folder if it doen't exist
     not os.path.isdir(PATH_RESULTS) and os.mkdir(PATH_RESULTS)
 
-    path_images = [os.path.join(PATH_IMAGES, path) for path in os.listdir(PATH_IMAGES)]
+    path_images = [os.path.join(PATH_IMAGES, path) for path in os.listdir(PATH_IMAGES) if path.endswith(('.png', '.PNG', '.jpg', '.JPEG'))]
     path_images = [file for file in path_images if not file.endswith('.csv') and not file.endswith('.txt')]
    
     model.eval()
