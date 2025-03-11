@@ -1,12 +1,21 @@
-# DarkIR: Robust Low-Light Image Restoration
+# [CVPR 2025] DarkIR: Robust Low-Light Image Restoration
 
 [![Hugging Face](https://img.shields.io/badge/Demo-%F0%9F%A4%97%20Hugging%20Face-blue)](https://huggingface.co/spaces/Cidaut/DarkIR) 
 [![paper](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2412.13443)
 
-Daniel Feijoo, Juan C. Benito, Alvaro Garcia, Marcos V. Conde
+**[Daniel Feijoo](https://scholar.google.com/citations?hl=en&user=hqbPn4YAAAAJ), [Juan C. Benito](https://scholar.google.com/citations?hl=en&user=f186MIUAAAAJ), [Alvaro Garcia](https://scholar.google.com/citations?hl=en&user=c6SJPnMAAAAJ), [Marcos V. Conde](https://scholar.google.com/citations?user=NtB1kjYAAAAJ&hl=en)** (CIDAUT AI  and University of Wuerzburg)
 
-> **Abstract:**
+🚀 Try the model for free in 🤗 [HuggingFace Spaces: DarkIR](https://huggingface.co/spaces/Cidaut/DarkIR), download [model weights/checkpoint](https://cidautes-my.sharepoint.com/:f:/g/personal/alvgar_cidaut_es/Epntbl4SucFNpeIT_jyYZ-cB9BamMbacbyq_svrkMCpShA?e=XB9YBB) and [HF checkpoint](https://huggingface.co/Cidaut/DarkIR/). 
+
+**TLDR.** In low-light conditions, you have noise and blur in the images, yet, previous methods cannot tackle dark noisy images and dark blurry using a single model. We propose the first approach for all-in-one low-light restoration including illumination, noisy and blur enhancement.
+
+*We evaluate our model on LOLBlur, RealLOLBlur, LOL, LOLv2 and LSRW. Follow this repo to receive updates :)*
+
+<details>
+<summary> <b> ABSTRACT </b> </summary>
 >Photography during night or in dark conditions typically suffers from noise, low light and blurring issues due to the dim environment and the common use of long exposure. Although Deblurring and Low-light Image Enhancement (LLIE) are related under these conditions, most approaches in image restoration solve these tasks separately. In this paper, we present an efficient and robust neural network for multi-task low-light image restoration. Instead of following the current tendency of Transformer-based models, we propose new attention mechanisms to enhance the receptive field of efficient CNNs. Our method reduces the computational costs in terms of parameters and MAC operations compared to previous methods. Our model, DarkIR, achieves new state-of-the-art results on the popular LOLBlur, LOLv2 and Real-LOLBlur datasets, being able to generalize on real-world night and dark images.
+</details>
+
 
 
 | <img src="assets/teaser/0085_low.png" alt="add" width="450"> | <img src="assets/teaser/0085_retinexformer.png" alt="add" width="450"> | <img src="assets/teaser/0085_darkir.png" alt="add" width="450"> |
@@ -140,6 +149,19 @@ which will be saved in `./videos/results`.
 
 
 <p align="center">  <img src="assets/qualis_realblur_night.jpg" alt="Example Image" width="70%"> </p>
+
+## Citation and acknowledgement
+
+This work has been accepted for publication and presentation at The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) 2025.
+
+```
+@inproceedings{feijoo2024darkir,
+  title={DarkIR: Robust Low-Light Image Restoration},
+  author={Feijoo, Daniel and Benito, Juan C and Garcia, Alvaro and Conde, Marcos V},
+  booktitle={IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  year={2025}
+}
+```
 
 ## Contact
 
