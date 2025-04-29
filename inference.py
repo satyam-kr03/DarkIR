@@ -67,81 +67,68 @@ def pad_tensor(tensor, multiple = 8):
     return tensor
 
 def load_model(model, path_weights):
-    map_location = 'cpu'
-    checkpoints = torch.load(path_weights, map_location=map_location, weights_only=False)
-   
-    weights = checkpoints['params']
-    weights = {'module.' + key: value for key, value in weights.items()}
+    # load checkpoint
+    ckpt = torch.load(path_weights, map_location="cpu")
+    state_dict = ckpt['params']
 
-    macs, params = get_model_complexity_info(model, (3, 256, 256), print_per_layer_stat=False, verbose=False)
-    print(macs, params)
-    model.load_state_dict(weights)
-    print('Loaded weights correctly')
-    
+    # check keys in model vs. in state_dict
+    model_keys      = list(model.state_dict().keys())
+    checkpoint_keys = list(state_dict.keys())
+
+    # if checkpoint keys start with "module.", strip it
+    if all(key.startswith("module.") for key in checkpoint_keys):
+        new_sd = { key[len("module."):]: v
+                   for key, v in state_dict.items() }
+    # if checkpoint keys lack "module." but model expects it, add it
+    elif all(not key.startswith("module.") for key in checkpoint_keys) \
+         and all(mk.startswith("module.") for mk in model_keys):
+        new_sd = { "module." + key: v
+                   for key, v in state_dict.items() }
+    else:
+        # keys already match
+        new_sd = state_dict
+
+    # finally load
+    model.load_state_dict(new_sd, strict=True)
+    print("✅ Loaded weights")
     return model
+
 
 #parameters for saving model
 PATH_MODEL = opt['save']['path']
 resize = opt['Resize']
 
-def predict_folder(rank, world_size):
-    
-    setup(rank, world_size=world_size, Master_port='12354')
-    
-    # DEFINE NETWORK, SCHEDULER AND OPTIMIZER
-    model, _, _ = create_model(opt['network'], rank=rank)
+def predict_folder():
+    # create the model (without passing a rank)
+    model, _, _ = create_model(opt['network'], rank=0)
+    # load on CPU, then move to the right device
+    model = load_model(model, opt['save']['path'])
+    model = model.to(device)
 
-    model = load_model(model, path_weights = opt['save']['path'])
-    # create data
-    PATH_IMAGES= args.inp_path
-    PATH_RESULTS = './images/results'
+    os.makedirs('./images/results', exist_ok=True)
+    images = [f for f in os.listdir(args.inp_path)
+              if f.lower().endswith(('.png','jpg','jpeg'))]
 
-    #create folder if it doen't exist
-    not os.path.isdir(PATH_RESULTS) and os.mkdir(PATH_RESULTS)
+    for fn in tqdm(images, desc="Inferring"):
+        tensor = path_to_tensor(os.path.join(args.inp_path, fn)).to(device)
+        H, W = tensor.shape[-2:]
 
-    path_images = [os.path.join(PATH_IMAGES, path) for path in os.listdir(PATH_IMAGES) if path.endswith(('.png', '.PNG', '.jpg', '.JPEG'))]
-    path_images = [file for file in path_images if not file.endswith('.csv') and not file.endswith('.txt')]
-   
-    model.eval()
-    if rank==0:
-        pbar = tqdm(total = len(path_images))
-        
-    for path_img in path_images:
-        tensor = path_to_tensor(path_img).to(device)
-        _, _, H, W = tensor.shape
-        
-        if resize and (H >=1500 or W>=1500):
-            new_size = [int(dim//2) for dim in (H, W)]
-            downsample = Resize(new_size)
-        else:
-            downsample = torch.nn.Identity()
-        tensor = downsample(tensor)
-        
+        # optional downsampling for large images
+        if opt['Resize'] and max(H, W) >= 1500:
+            tensor = Resize([H//2, W//2])(tensor)
+
         tensor = pad_tensor(tensor)
 
         with torch.no_grad():
-            output = model(tensor, side_loss=False)
-        if resize:
-            upsample = Resize((H, W))
-        else: upsample = torch.nn.Identity()
-        output = upsample(output)
-        output = torch.clamp(output, 0., 1.)
-        output = output[:,:, :H, :W]
-        save_tensor(output, os.path.join(PATH_RESULTS, os.path.basename(path_img)))
+            out = model(tensor, side_loss=False)
 
+        out = torch.clamp(out, 0., 1.)[:, :, :H, :W]
+        save_tensor(out, os.path.join('./images/results', fn))
 
-        pbar.update(1)
-        pass
-
-    print('Finished inference!')
-    if rank == 0:
-        pbar.close()   
-    cleanup()
+    print("Finished inference!")
 
 def main():
-    world_size = 1
-    print('Used GPUS:', world_size)
-    mp.spawn(predict_folder, args =(world_size,), nprocs=world_size, join=True)
+    predict_folder()
 
 if __name__ == '__main__':
     main()

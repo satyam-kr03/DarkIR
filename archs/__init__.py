@@ -32,9 +32,15 @@ def create_model(opt, rank, adapter = False):
     else:
         macs, params = None, None
 
-    model.to(rank)
-    
-    model = DDP(model, device_ids=[rank], find_unused_parameters=adapter)
+    # instead of .to(rank), move to the global `device`
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    # only wrap in DDP if you're actually in a multi-process run
+    if torch.distributed.is_initialized():
+        model = DDP(model, device_ids=[device.index] if device.type=="cuda" else None,
+                    find_unused_parameters=adapter)
+
     
     return model, macs, params
 
