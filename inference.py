@@ -15,7 +15,7 @@ args = parser.parse_args()
 
 path_options = args.config
 opt = parse(path_options)
-os.environ["CUDA_VISIBLE_DEVICES"]= "1"
+os.environ["CUDA_VISIBLE_DEVICES"]= "0"
 
 # PyTorch library
 import torch
@@ -99,46 +99,49 @@ PATH_MODEL = opt['save']['path']
 resize = opt['Resize']
 
 def predict_folder():
-    # create the model (without passing a rank)
+    # create and load the model as before…
     model, _, _ = create_model(opt['network'], rank=0)
-    # load on CPU, then move to the right device
     model = load_model(model, opt['save']['path'])
     model = model.to(device)
+    model.eval()
 
     os.makedirs('./images/results', exist_ok=True)
     images = [f for f in os.listdir(args.inp_path)
               if f.lower().endswith(('.png','jpg','jpeg'))]
 
     for fn in tqdm(images, desc="Inferring"):
-        tensor = path_to_tensor(os.path.join(args.inp_path, fn)).to(device)
-        H, W = tensor.shape[-2:]
+        img_path = os.path.join(args.inp_path, fn)
+        try:
+            tensor = path_to_tensor(img_path).to(device)
+            H, W = tensor.shape[-2:]
 
-        # optional downsampling for large images
-        if opt['Resize'] and max(H, W) >= 1500:
-            tensor = Resize([H//2, W//2])(tensor)
+            # optional downsampling for large images
+            if opt['Resize'] and max(H, W) >= 1500:
+                tensor = Resize([H//2, W//2])(tensor)
 
-        tensor = pad_tensor(tensor)
+            tensor = pad_tensor(tensor)
 
-        with torch.no_grad():
-            out = model(tensor, side_loss=False)
+            with torch.no_grad():
+                out = model(tensor, side_loss=False)
 
-        out = torch.clamp(out, 0., 1.)[:, :, :H, :W]
-        save_tensor(out, os.path.join('./images/results', fn))
+            out = torch.clamp(out, 0., 1.)[:, :, :H, :W]
+            save_tensor(out, os.path.join('./images/results', fn))
+
+        except RuntimeError as e:
+            # Check if this is an OOM error
+            if 'out of memory' in str(e):
+                tqdm.write(f"⚠️ CUDA OOM on {fn}, skipping.")
+                # free up whatever we can
+                torch.cuda.empty_cache()
+                continue
+            else:
+                # re‑raise other runtime errors
+                raise
 
     print("Finished inference!")
-
+    
 def main():
     predict_folder()
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
